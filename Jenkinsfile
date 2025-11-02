@@ -1,10 +1,13 @@
 pipeline {
     agent any
-    
+
     options {
-        cleanWs()
+        // valid options only
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
     }
-        
+    
     environment {
         // Azure credentials from Jenkins
         AZURE_CLIENT_ID = credentials('azure-client-id')
@@ -40,7 +43,7 @@ pipeline {
     steps {
         echo 'Checking out code from Git...'
         // Clean workspace first
-        deleteDir()
+        cleanWs()
         // Clone the repository
         git branch: 'main',
             url: 'https://github.com/sunnysavita10/automated-research-report-generation.git'
