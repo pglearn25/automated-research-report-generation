@@ -1,6 +1,10 @@
 pipeline {
     agent any
     
+    options {
+        cleanWs()
+    }
+        
     environment {
         // Azure credentials from Jenkins
         AZURE_CLIENT_ID = credentials('azure-client-id')
