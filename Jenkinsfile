@@ -40,8 +40,10 @@ pipeline {
     steps {
         echo 'Checking out code from Git...'
         // Clean workspace first
-        checkout scm
+        deleteDir()
         // Clone the repository
+        git branch: 'main',
+            url: 'https://github.com/sunnysavita10/automated-research-report-generation.git'
     }
 }
         
