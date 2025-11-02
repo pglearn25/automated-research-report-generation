@@ -42,9 +42,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Checking out code from Git...'
-                // Clean workspace first
                 cleanWs()
-                // Clone the repository
                 git branch: 'main',
                     url: 'https://github.com/sunnysavita10/automated-research-report-generation.git'
             }
@@ -55,7 +53,6 @@ pipeline {
                 echo 'Setting up Python environment...'
                 sh '''
                     python3 --version
-                    # Use --break-system-packages since we're in a container
                     python3 -m pip install --upgrade pip --break-system-packages
                 '''
             }
@@ -65,7 +62,6 @@ pipeline {
             steps {
                 echo 'Installing Python dependencies...'
                 sh '''
-                    # Install in user space to avoid system-wide issues
                     pip3 install -r requirements.txt --break-system-packages
                 '''
             }
@@ -75,8 +71,6 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 sh '''
-                    # Add your test commands here
-                    # For now, just verify imports work
                     python3 -c "from research_and_analyst.api.main import app; print('Imports successful')"
                 '''
             }
@@ -100,15 +94,13 @@ pipeline {
             steps {
                 echo 'Verifying Docker image exists in ACR...'
                 script {
-                    // Get the latest tag from ACR
                     def imageTag = sh(
                         script: """
                             az acr repository show-tags \
                               --name \$ACR_NAME \
                               --repository \$IMAGE_NAME \
                               --orderby time_desc \
-                              --output tsv \
-                              | head -n 1
+                              --output tsv | head -n 1
                         """,
                         returnStdout: true
                     ).trim()
@@ -120,7 +112,6 @@ pipeline {
                         error "No images found in ACR. Please run: ./build-and-push-docker-image.sh"
                     }
 
-                    // Show all available tags
                     sh """
                         echo "Available tags:"
                         az acr repository show-tags \
@@ -281,7 +272,6 @@ pipeline {
                       --query properties.configuration.ingress.fqdn -o tsv)
 
                     echo "Application URL: https://$APP_URL"
-
                     echo "Waiting for application to be ready..."
                     sleep 30
 
@@ -297,18 +287,14 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo '❌ Pipeline failed!'
         }
         always {
-            script {
-                echo 'Cleaning up workspace...'
-                node {
-                    cleanWs()
-                }
-            }
+            echo '🧹 Cleaning up workspace...'
+            cleanWs()
         }
     }
 }
